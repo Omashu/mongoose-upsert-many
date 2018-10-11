@@ -3,13 +3,16 @@
 /**
  * Load helpers
  */
+const pick = require('lodash/pick');
 const modelToObject = require('./helpers/model-to-object');
 const matchCriteria = require('./helpers/match-criteria');
+const arrayKeys = require('./helpers/array-keys');
 
 /**
  * Apply bulk upsert helper to schema
  */
 module.exports = function upsertMany(schema) {
+
   schema.statics.upsertMany = function(items, matchFields, args) {
     const props = Object.assign({}, { update: false }, args || {});
 
@@ -23,7 +26,7 @@ module.exports = function upsertMany(schema) {
     const bulk = this.collection.initializeUnorderedBulkOp();
     items
       .map(item => modelToObject(item, this))
-      .forEach(item => {
+      .forEach((item, index) => {
 
         //Extract match criteria
         const match = matchCriteria(item, matchFields);
@@ -37,7 +40,9 @@ module.exports = function upsertMany(schema) {
           .upsert();
 
         if (props.update) {
-          op.updateOne(item);
+          const pickKeys = arrayKeys(items[index]);
+          const values = pick(item, pickKeys);
+          op.updateOne({ $set: values });
           return;
         }
 

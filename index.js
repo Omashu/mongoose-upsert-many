@@ -32,16 +32,16 @@ module.exports = function upsertMany(schema) {
         delete item._id;
 
         //Create upsert
-        bulk
+        const op = bulk
           .find(match)
           .upsert();
 
         if (props.update) {
-          bulk.updateOne(item);
+          op.updateOne(item);
           return;
         }
 
-        bulk.replaceOne(item);
+        op.replaceOne(item);
       });
 
     //Execute bulk operation wrapped in promise

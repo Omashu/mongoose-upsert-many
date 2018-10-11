@@ -10,7 +10,8 @@ const matchCriteria = require('./helpers/match-criteria');
  * Apply bulk upsert helper to schema
  */
 module.exports = function upsertMany(schema) {
-  schema.statics.upsertMany = function(items, matchFields) {
+  schema.statics.upsertMany = function(items, matchFields, args) {
+    const props = Object.assign({}, args || {}, { update: false });
 
     //Use default match fields if none provided
     matchFields = matchFields || schema.options.upsertMatchFields;
@@ -33,8 +34,14 @@ module.exports = function upsertMany(schema) {
         //Create upsert
         bulk
           .find(match)
-          .upsert()
-          .replaceOne(item);
+          .upsert();
+
+        if (props.update) {
+          bulk.updateOne(item);
+          return;
+        }
+
+        bulk.replaceOne(item);
       });
 
     //Execute bulk operation wrapped in promise

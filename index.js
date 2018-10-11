@@ -11,7 +11,7 @@ const matchCriteria = require('./helpers/match-criteria');
  */
 module.exports = function upsertMany(schema) {
   schema.statics.upsertMany = function(items, matchFields, args) {
-    const props = Object.assign({}, args || {}, { update: false });
+    const props = Object.assign({}, { update: false }, args || {});
 
     //Use default match fields if none provided
     matchFields = matchFields || schema.options.upsertMatchFields;
